@@ -6,6 +6,12 @@ const StringDecoder = require('string_decoder').StringDecoder
 const config = require('./config');
 const fs = require('fs');
 
+const _data = require('./lib/data');
+
+_data.delete('test','newFile',(err) =>{
+    console.log('err:', err, ' data:');
+})
+
 const httpServer = http.createServer((req,res)=>{
   unifiedServer(req, res)
 })
@@ -26,7 +32,7 @@ httpsServer.listen( config.httpsPort, ()=>{
     console.log('Listening on port ', config.httpsPort,  'env: ', config.envName );
 })
 
-const ufifiedServer = (req, res) => {
+const unifiedServer = (req, res) => {
     const parsedUrl = url.parse(req.url, true);
     const path = parsedUrl.pathname;
     const trimmedPath = path.replace(/^\/+|\/+$/g,'');
@@ -65,13 +71,14 @@ const ufifiedServer = (req, res) => {
 }
 
 const handlers = {}
-handlers.sample = (data, callback) => {
-    callback(406,{ name: 'sample-handler' })
+handlers.ping = (data, callback) => {
+    callback(200)
 }
+
 handlers.notFound = (data,  callback) => {
     callback(404);
 }
 
 const router = {
-    'sample': handlers.sample
+    'ping': handlers.ping
 }

@@ -3,14 +3,11 @@ const https = require('https');
 
 const url = require('url');
 const StringDecoder = require('string_decoder').StringDecoder
-const config = require('./config');
+const config = require('./lib/config');
 const fs = require('fs');
+const helpers = require('./lib/helpers');
 
-const _data = require('./lib/data');
-
-_data.delete('test','newFile',(err) =>{
-    console.log('err:', err, ' data:');
-})
+const handlers = require('./lib/handlers');
 
 const httpServer = http.createServer((req,res)=>{
   unifiedServer(req, res)
@@ -41,12 +38,12 @@ const unifiedServer = (req, res) => {
     const headers = req.headers;
 
     const decoder = new StringDecoder('utf-8');
-    let payload = '';
+    let buffer = '';
     req.on('data', data => {
-        payload += decoder.write(data)
+        buffer += decoder.write(data)
     })
     req.on('end', ()=>{
-        payload+= decoder.end()
+        buffer+= decoder.end()
         
         const chosenHandler = typeof(router[trimmedPath]) !== 'undefined' ? router[trimmedPath] : handlers.notFound
         const data = {
@@ -54,7 +51,7 @@ const unifiedServer = (req, res) => {
             queryStringObject,
             method,
             headers,
-            payload,
+            payload: helpers.parseJsonToObject(buffer)
         }
         chosenHandler( data, (statusCode, payload) => {
             statusCode = typeof(statusCode) == 'number' ? statusCode : 200;
@@ -70,15 +67,8 @@ const unifiedServer = (req, res) => {
     })
 }
 
-const handlers = {}
-handlers.ping = (data, callback) => {
-    callback(200)
-}
-
-handlers.notFound = (data,  callback) => {
-    callback(404);
-}
 
 const router = {
-    'ping': handlers.ping
+    'ping': handlers.ping,
+    'users': handlers.users
 }

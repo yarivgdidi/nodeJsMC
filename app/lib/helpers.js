@@ -1,5 +1,6 @@
 
 const crypto = require('crypto');
+const { type } = require('os');
 const config = require('./config');
 
 const helpers = {}
@@ -20,6 +21,21 @@ helpers.parseJsonToObject = str => {
        // console.log(e);
         return {}
     }
+}
+
+helpers.createRandomString = strLength => {
+    strLength = typeof(strLength) == 'number' && strLength > 0 ? strLength : false;
+    let str = '';
+    if (strLength) {
+        const possibleChars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+        for (i = 1; i<= strLength; i++ ) {
+            const randomChar = possibleChars.charAt(Math.floor(Math.random() * possibleChars.length));
+            str += randomChar;
+        }
+    } else {
+        return false
+    }
+    return str; 
 }
 helpers.parseS
 module.exports = helpers;

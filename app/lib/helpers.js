@@ -37,5 +37,5 @@ helpers.createRandomString = strLength => {
     }
     return str; 
 }
-helpers.parseS
+
 module.exports = helpers;

@@ -35,8 +35,8 @@ workers.gatherAllchecks = () => {
 }
 
 workers.validateCheckData = (originalCheckData) => {
-    const { id, userPhone, protocol, url, method, successCodes, timeoutSeconts, state = 'down', lastChaked = false  } = originalCheckData;
-    if ( id && userPhone && protocol && url && method && successCodes && timeoutSeconts ) {
+    const { id, userPhone, protocol, url: _url, method, successCodes, timeoutSeconds } = originalCheckData;
+    if ( id && userPhone && protocol && _url && method && successCodes && timeoutSeconds ) {
         workers.performCheck(originalCheckData);
     } else {
         console.log('Error, check data error')
@@ -45,7 +45,7 @@ workers.validateCheckData = (originalCheckData) => {
 } 
 
 workers.performCheck = (originalCheckData) => {
-    const { id, userPhone, protocol, url, method, successCodes, timeoutSeconts, state = 'down', lastChaked = false  } = originalCheckData;
+    const { id, userPhone, protocol, url: _url, method, successCodes, timeoutSeconds, state = 'down', lastCheked = false  } = originalCheckData;
 
     const checkOutcome = {
         error: false,
@@ -54,7 +54,7 @@ workers.performCheck = (originalCheckData) => {
 
     let outcomeSent = false;
 
-    const parsedUrl = url.parse(`${protocol}://${url}`, true);
+    const parsedUrl = url.parse(`${protocol}://${_url}`, true);
     const hostname = parsedUrl.hostname;
     const path = parsedUrl.path;
     
@@ -63,12 +63,12 @@ workers.performCheck = (originalCheckData) => {
         hostname,
         method: method.toUpperCase(),
         path,
-        timeout: timeoutSeconts * 1000
+        timeout: timeoutSeconds * 1000
     }
     const _moduleToUse = protocol === 'http' ? http : https;
 
     req = _moduleToUse.request(requestDetails, res => {
-        const {statusCode} = request;
+        const {statusCode} = req;
         checkOutcome.responseCode = statusCode;
         if (!outcomeSent) {
             workers.procesCheckOutcome(originalCheckData, checkOutcome)
@@ -107,7 +107,7 @@ workers.procesCheckOutcome = (originalCheckData, checkOutcome) => {
 
     const newCheckData = originalCheckData;
     newCheckData.state = state;
-    newCheckData.lastChaked = Data.now(); 
+    newCheckData.lastChaked = Date.now(); 
     _data.update('checks', newCheckData.id, newCheckData, err => {
         if (!err) {
             if (alertWarrented) {

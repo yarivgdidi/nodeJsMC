@@ -78,4 +78,18 @@ lib.delete = (dir, file, callback) => {
         err ? callback('Error deletinf file') : callback(false);
     } )
 }
+
+lib.list = (dir, callback) => {
+    fs.readdir(`${lib.baseDir}dir/`, (err,data) => {
+        if (!err && data && data.length > 0) {
+            const trimmedFileNames = [];
+            data.forEach(filename => {
+                trimmedFileNames.push(filename.replace('.json', ''));
+            })
+            callback(false, trimmedFileNames);
+        } else {
+            callback(err, data)
+        } 
+    })
+} 
 module.exports = lib;
